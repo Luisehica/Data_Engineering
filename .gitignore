@@ -1,2 +1,4 @@
 *.png
-.ipynb_chepoints/
+*.csv
+/.ipynb_chepoints/
+/web_scraping/__pycache__/

@@ -12,7 +12,7 @@ import news_page_objects as news
 from common import config
 
 logger = logging.getLogger(__name__)
-is_well_formed_url = re.compile(r'https?://.+/.+$') # https://example.com/hello
+is_well_formed_url = re.compile(r'^https?://.+/.+$') # https://example.com/hello
 is_root_path = re.compile(r'^/.+$') # / some-text
 
 def _news_scraper(news_site_uid):

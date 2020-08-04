@@ -11,3 +11,9 @@ news_sites:
       homepage_article_links: ''
       article_body: ''
       article_title: ''
+  lanuevaprensa:
+    url: https://www.lanuevaprensa.com.co/
+    queries:
+      homepage_article_links: ''
+      article_body: ''
+      article_title: ''
