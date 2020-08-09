@@ -4,10 +4,11 @@ logging.basicConfig(level=logging.INFO)
 from urllib.parse import urlparse
 
 import pandas as pd
-
 import hashlib
+import nltk
+from nltk.corpus import stopwords
 
-
+stop_words = set(stopwords.words('Spanish'))
 logger = logging.getLogger(__name__)
 
 def main(filename):
@@ -20,14 +21,19 @@ def main(filename):
     df = _fill_missing_title(df)
     df = _generate_uids_for_rows(df)
     df = _remove_new_lines_from_body(df)
-    return df
+    df = _tokenize_column(df,'title')
+    df = _tokenize_column(df,'body')
+    df = _remove_duplicate_entries(df,'title')
+    df = _drop_rows_with_missing_values(df)
+    _save_data(df, filename)
+    return df 
 
 def _read_data(filename):
     logger.info(f'Reading file {filename}')
     return pd.read_csv(filename)
 
 def _extract_newspaper_uid(filename):
-    logger.info('Extracting newspaper uid')
+    logger.info(f'Extracting newspaper uid from {filename}')
     newspaper_uid = filename.split('_')[0]
     
     logger.info(f'Newspaper uid detected: {newspaper_uid}')
@@ -81,7 +87,30 @@ def _remove_new_lines_from_body2(df):
     df['body'] = stripped_body
     return df
 
+def _tokenize_column(df, column_name):
+    logger.info(f'Tokenize column {column_name}')
+    df[f'n_tokenize_{column_name}']= (df.dropna()
+                .apply(lambda row: nltk.word_tokenize(row[column_name]), axis=1)
+                .apply(lambda tokens: list(filter(lambda token: token.isalpha(), tokens)))
+                .apply(lambda tokens: list(map(lambda token: token.lower(), tokens)))
+                .apply(lambda word_list: list(filter(lambda word: word not in stop_words, word_list)))
+                .apply(lambda valid_word_list: len(valid_word_list))
+           )
+    return df
 
+def _remove_duplicate_entries(df, column_name):
+    logger.info(f'Removing duplicate entries from {column_name}')
+    df.drop_duplicates(subset=[column_name], keep='first', inplace=True)
+    return df
+
+def _drop_rows_with_missing_values(df):
+    logger.info('Dropping rows with missing values')
+    return df.dropna()
+
+def _save_data(df, filename):
+    clean_filename = f'clean_{filename}'
+    logger.info(f'Saving data as {clean_filename}')
+    df.to_csv(clean_filename)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
