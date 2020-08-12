@@ -17,3 +17,9 @@ news_sites:
       homepage_article_links: ''
       article_body: ''
       article_title: ''
+  losirreverentes:
+    url: https://www.losirreverentes.com/category/articulos/
+    queries:
+      homepage_article_links: 'paginated_content'
+      article_body: 'post-content entry-content'
+      article_title: 'title'

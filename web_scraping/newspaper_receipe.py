@@ -2,6 +2,7 @@ import argparse
 import logging
 logging.basicConfig(level=logging.INFO)
 from urllib.parse import urlparse
+import re
 
 import pandas as pd
 import hashlib
@@ -21,6 +22,7 @@ def main(filename):
     df = _fill_missing_title(df)
     df = _generate_uids_for_rows(df)
     df = _remove_new_lines_from_body(df)
+    df = _remove_html_from_body(df)
     df = _tokenize_column(df,'title')
     df = _tokenize_column(df,'body')
     df = _remove_duplicate_entries(df,'title')
@@ -81,9 +83,10 @@ def _remove_new_lines_from_body(df):
     df['body'] = stripped_body
     return df
 
-def _remove_new_lines_from_body2(df):
-    logger.info('Remove new lines from body using')
-    stripped_body = df.apply(lambda row: row['body'].replace('\n',''), axis=1)
+def _remove_html_from_body(df):
+    logger.info('Remove html from body using pandas and regex')
+    clean_html = re.compile('<.*?>')
+    stripped_body = df.apply(lambda row: re.sub(clean_html, '', row['body']), axis=1)
     df['body'] = stripped_body
     return df
 
